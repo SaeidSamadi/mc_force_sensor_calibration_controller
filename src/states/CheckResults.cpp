@@ -40,13 +40,14 @@ void CheckResults::start(mc_control::fsm::Controller & ctl)
   {
     const auto filename = calib_path + "/calib_data." + sensorN;
     mc_rtc::log::info("[{}] Loading calibration file {}", name(), filename);
-    auto & sensor = ctl.robot().data()->forceSensors[ctl.robot().data()->forceSensorsIndex.at(sensorN)];
+
+    auto & sensor = ctl.robot().forceSensor(sensorN);
     sensor.loadCalibrator(filename, ctl.robot().mbc().gravity);
 
     ctl.logger().addLogEntry(sensor.name() + "_calibrated",
                              [&robot, &sensor]() { return sensor.wrenchWithoutGravity(robot); });
 
-    ctl.gui()->addPlot(
+    ctl.gui().addPlot(
         sensorN, plot::X({"t", {t_ + 0, t_ + duration}}, [this]() { return t_; }),
         plot::Y(
             "Wrenches calibrated (x)", [&robot, &sensor]() { return sensor.wrenchWithoutGravity(robot).force().x(); },
@@ -65,7 +66,7 @@ void CheckResults::start(mc_control::fsm::Controller & ctl)
             "Wrenches raw(z)", [&sensor]() { return sensor.wrench().force().z(); }, Color::Blue, Style::Dashed));
   }
 
-  ctl.gui()->addElement(
+  ctl.gui().addElement(
       {}, Label("Status", []() { return "Check the plots to see if the calibrated measurements are close to zero"; }),
       Button("Save calibration", [this, &ctl]() { saveCalibration(ctl); }),
       Button("Finish without saving", [this, &ctl]() { running_ = false; }), Button("Save and finish", [this, &ctl]() {
@@ -78,7 +79,7 @@ bool CheckResults::run(mc_control::fsm::Controller & ctl_)
 {
   if(running_)
   {
-    t_ += ctl_.timeStep;
+    t_ += ctl_.solver().dt();
     return false;
   }
   else
@@ -131,11 +132,11 @@ void CheckResults::teardown(mc_control::fsm::Controller & ctl)
 {
   for(const auto & sensor : sensors_)
   {
-    ctl.gui()->removePlot(sensor);
-    ctl.gui()->removeElement({}, "Status");
-    ctl.gui()->removeElement({}, "Save calibration");
-    ctl.gui()->removeElement({}, "Finish without saving");
-    ctl.gui()->removeElement({}, "Save and finish");
+    ctl.gui().removePlot(sensor);
+    ctl.gui().removeElement({}, "Status");
+    ctl.gui().removeElement({}, "Save calibration");
+    ctl.gui().removeElement({}, "Finish without saving");
+    ctl.gui().removeElement({}, "Save and finish");
     ctl.logger().removeLogEntry(sensor + "_calibrated");
   }
 }

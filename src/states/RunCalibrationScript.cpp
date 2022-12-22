@@ -108,7 +108,7 @@ bool RunCalibrationScript::run(mc_control::fsm::Controller &)
 
 void RunCalibrationScript::teardown(mc_control::fsm::Controller & ctl_)
 {
-  ctl_.gui()->removeElement({}, "Status");
+  ctl_.gui().removeElement({}, "Status");
 }
 
 EXPORT_SINGLE_STATE("RunCalibrationScript", RunCalibrationScript)

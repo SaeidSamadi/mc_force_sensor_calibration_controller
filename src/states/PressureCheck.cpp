@@ -37,15 +37,15 @@ void PressureCheck::check(mc_control::fsm::Controller & ctl)
     mc_rtc::log::error("[{}] Excessive force detected on sensors [{}]:\n{}\nPlease make sure that they are not in "
                        "contact and that the calibration motion can be safely executed, then click on \"Continue\".",
                        name(), mc_rtc::io::to_string(errorSensors), error);
-    ctl.gui()->removeElement({}, "Error");
-    ctl.gui()->removeElement({}, "Continue");
-    ctl.gui()->addElement(
+    ctl.gui().removeElement({}, "Error");
+    ctl.gui().removeElement({}, "Continue");
+    ctl.gui().addElement(
         {}, mc_rtc::gui::Label("Error", [errorSensors]() {
           return fmt::format("Excessive force detected on sensors [{}], please make sure that they are not in contact "
                              "and that the calibration motion can be safely executed, then click on \"Continue\".",
                              mc_rtc::io::to_string(errorSensors));
         }));
-    ctl.gui()->addElement({}, mc_rtc::gui::Button("Continue", [this, &ctl]() { check(ctl); }));
+    ctl.gui().addElement({}, mc_rtc::gui::Button("Continue", [this, &ctl]() { check(ctl); }));
   }
 }
 
@@ -56,8 +56,8 @@ bool PressureCheck::run(mc_control::fsm::Controller & ctl)
 
 void PressureCheck::teardown(mc_control::fsm::Controller & ctl)
 {
-  ctl.gui()->removeElement({}, "Error");
-  ctl.gui()->removeElement({}, "Continue");
+  ctl.gui().removeElement({}, "Error");
+  ctl.gui().removeElement({}, "Continue");
 }
 
 EXPORT_SINGLE_STATE("PressureCheck", PressureCheck)

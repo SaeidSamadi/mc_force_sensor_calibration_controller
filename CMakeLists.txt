@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 
 # Required for Ceres
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 set(PROJECT_NAME ForceSensorCalibration)
 set(PROJECT_DESCRIPTION "ForceSensorCalibration")

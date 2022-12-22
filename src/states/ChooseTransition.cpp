@@ -13,7 +13,7 @@ void ChooseTransition::start(mc_control::fsm::Controller & ctl)
   using namespace mc_rtc::gui;
   for(const auto & action : actions_)
   {
-    ctl.gui()->addElement(category_, Button(action.first, [this, action]() {
+    ctl.gui().addElement(category_, Button(action.first, [this, action]() {
                             mc_rtc::log::info("[{}] Action {} chosen, triggering output {}", name(), action.first,
                                               action.second);
                             output(action.second);
@@ -34,7 +34,7 @@ void ChooseTransition::teardown(mc_control::fsm::Controller & ctl)
 {
   for(const auto & action : actions_)
   {
-    ctl.gui()->removeElement(category_, action.first);
+    ctl.gui().removeElement(category_, action.first);
   }
 }
 

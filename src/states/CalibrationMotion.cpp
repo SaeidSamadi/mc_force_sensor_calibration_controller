@@ -34,9 +34,10 @@ void CalibrationMotion::start(mc_control::fsm::Controller & ctl)
     mc_filter::utils::clampInPlace(percentLimits, 0, 1);
     double period = jConfig("period");
     auto jidx = robot.jointIndexByName(name);
+    auto jIndexInParam = robot.mb().jointPosInParam(jidx);
     auto start = robot.mbc().q[jidx][0];
-    auto actualLower = robot.ql()[jidx][0];
-    auto actualUpper = robot.qu()[jidx][0];
+    auto actualLower = robot.limits().ql(jIndexInParam);
+    auto actualUpper = robot.limits().qu(jIndexInParam);
     auto actualRange = actualUpper - actualLower;
 
     // Reduced range
@@ -61,11 +62,13 @@ void CalibrationMotion::start(mc_control::fsm::Controller & ctl)
         [this, postureTask, lower, upper, start_dt, period, name]() {
           auto t = start_dt + dt_;
           auto q = lower + (upper - lower) * (1 + cos((2 * PI * t) / period)) / 2;
-          postureTask->target({{name, {q}}});
+          mc_rtc::map<std::string, std::vector<double>> jTarget;
+          jTarget[name] = {q};
+          postureTask->target(jTarget);
         });
   }
 
-  ctl.gui()->addElement({},
+  ctl.gui().addElement({},
                         mc_rtc::gui::NumberSlider(
                             "Progress", [this]() { return dt_; }, [](double) {}, 0, duration_),
                         mc_rtc::gui::Button("Stop Motion", [this]() {
@@ -100,7 +103,7 @@ bool CalibrationMotion::run(mc_control::fsm::Controller & ctl_)
     return true;
   }
 
-  dt_ += ctl_.timeStep;
+  dt_ += ctl_.solver().dt();
   return false;
 }
 
@@ -108,8 +111,8 @@ void CalibrationMotion::teardown(mc_control::fsm::Controller & ctl_)
 {
   auto postureTask = ctl_.getPostureTask(ctl_.robot().name());
   postureTask->stiffness(savedStiffness_);
-  ctl_.gui()->removeElement({}, "Progress");
-  ctl_.gui()->removeElement({}, "Stop Motion");
+  ctl_.gui().removeElement({}, "Progress");
+  ctl_.gui().removeElement({}, "Stop Motion");
   ctl_.datastore().remove("CalibrationMotion::Stop");
 }
 

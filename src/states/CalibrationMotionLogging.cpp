@@ -61,7 +61,7 @@ bool CalibrationMotionLogging::run(mc_control::fsm::Controller & ctl_)
   for(const auto & s : sensors_)
   {
     const auto & sensor = robot.forceSensor(s);
-    const auto & X_0_p = real.bodyPosW()[real.bodyIndexByName(sensor.parentBody())];
+    const auto & X_0_p = real.frame(sensor.parentBody()).position();
     const auto & measure = sensor.wrench();
     measurementsCount_[s].second++;
     if(singularityThreshold_ > 0)
